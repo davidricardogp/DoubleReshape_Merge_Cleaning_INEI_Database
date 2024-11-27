@@ -1,0 +1,1296 @@
+******************************Manufacturas Proyecto INEI 2015*******************************************
+****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************
+
+
+*Importamos Base CAP_01, Necesitaremos las variables: IRUC, CIIU, CCDD, CCPP, Organización Jurídica, Regimen de propiedad, Sector, Año inicio de actividades.
+
+pwd
+
+clear
+display "Por favor, introduce el directorio donde están los datos:"
+cd "/Users/davidricardogonzales/Desktop/Manufactura-INEI/DataEEA"
+
+
+import excel "2015/552-Modulo1094/a2015_CAP_01.xlsx", sheet("Hoja 1") firstrow
+
+
+*Borramos las variables que no necesitamos y hacemos un rename de las que si queremos (también podemos hacer un keep con las variables que queremos)
+drop NroEstablec
+drop Ccdi
+drop CodFormato
+drop FACTOR_EXP
+*problema de mal reporte con los años
+replace FecAniversario = 1995 if iruc == 15616
+*Eliminamos duplicados para proceder con el merge
+duplicates drop iruc, force
+*Hacemos un rename para poder hacer el Merge Completo 
+rename iruc IRUC
+*rename Ciiu CIIU
+rename Ccdd CCDD
+rename Ccpp CCPP
+rename CodOrgJuridica CODORGJURIDICA 
+rename CodRegPropiedad CODREGPROPIEDAD
+rename FecAniversario FECANIVERSARIO
+rename CodSector CODSECTOR
+
+//BASE 2015 LIMPIA CON TODOS LOS DATOS SOLICITADOS// 
+
+* Guardamos la base de datos en formato Stata (.dta)
+save "2015/Data Limpia/CAP_01_2015.dta", replace
+
+///////////////////////////////////////////////////////////////////
+*Importamos Base C00_1, Necesitaremos las variables: IRUC(Está en CAP_01) Meses trabajados, Ingresos Netos.
+clear
+import excel "2015/552-Modulo1104/a2015_s11_fD2/a2015_s11_fD2_c00_1.xlsx", sheet("Hoja 1") firstrow
+
+*Borramos las variables que no necesitamos y hacemos un rename de las que si queremos
+
+*Como haremos el merge por IRUC, podemos borrar las variables repetidas. 
+rename T02 ingresosnetos
+rename T03 mesestrabajados
+
+keep IRUC ingresosnetos mesestrabajados
+
+save "2015/Data Limpia/C00_1_2015.dta", replace
+
+/////////////////////////////////////////////////////
+
+*Importamos Base C02_1, Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Resultado del ejercicio. 
+
+clear
+import excel "2015/552-Modulo1104/a2015_s11_fD2/a2015_s11_fD2_c02_1.xlsx", sheet("Hoja 1") firstrow
+
+drop NroEstablec
+drop Clave
+rename P01 REE
+keep IRUC REE
+duplicates drop IRUC, force
+
+save "2015/Data Limpia/c02_1_2015.dta", replace
+
+/////////////////////////////////////////////////////
+
+*Importamos Base C02E_2, Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Ventas en el pais y Ventas en el exterior. 
+
+clear
+import excel "2015/552-Modulo1104/a2015_s11_fD2/a2015_s11_fD2_c02E_2.xlsx", sheet("Hoja 1") firstrow
+
+drop NroEstablec
+drop Clave
+rename P01 VEP
+rename P02 VEX
+
+keep IRUC VEP VEX
+duplicates drop IRUC, force
+
+save "2015/Data Limpia/C02E_2_2015.dta", replace
+
+/////////////////////////////////////////////////////
+
+*Importamos Base C08AE_2 Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Gastos de personal . 
+
+clear
+import excel "2015/552-Modulo1104/a2015_s11_fD2/a2015_s11_fD2_c08AE_2.xlsx", sheet("Hoja 1") firstrow
+
+drop NroEstablec
+drop Clave
+rename P01 GAP
+
+keep IRUC GAP 
+duplicates drop IRUC, force
+
+save "2015/Data Limpia/c08AE_2_2015.dta", replace
+
+/////////////////////////////////////////////////////
+
+*Importamos Base c08_1 Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Dividendos . 
+
+clear
+import excel "2015/552-Modulo1104/a2015_s11_fD2/a2015_s11_fD2_c08_1.xlsx", sheet("Hoja 1") firstrow
+
+drop NroEstablec
+drop Clave
+rename P01 DIVI
+
+keep IRUC DIVI 
+duplicates drop IRUC, force
+save "2015/Data Limpia/c08_1_2015.dta", replace
+
+/////////////////////////////////////////////////////
+
+*Importamos Base c09AE_2 Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Insumos importados consumidos (materia prima) y Insumos nacionales consumidos (materia prima) . 
+
+clear
+import excel "2015/552-Modulo1104/a2015_s11_fD2/a2015_s11_fD2_c09AE_2.xlsx", sheet("Hoja 1") firstrow
+
+drop NroEstablec
+drop Clave
+rename P03 INC_MP
+rename P06 IIC_MP
+keep IRUC INC_MP IIC_MP
+duplicates drop IRUC, force
+save "2015/Data Limpia/c09AE_2_2015.dta", replace
+
+
+/////////////////////////////////////////////////////
+
+*Importamos Base c09DE_2 Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Insumos nacionales consumidos (repuestos y accesorios),Insumos importados consumidos (repuestos y accesorios)  . 
+
+clear
+import excel "2015/552-Modulo1104/a2015_s11_fD2/a2015_s11_fD2_c09DE_2.xlsx", sheet("Hoja 1") firstrow
+
+drop NroEstablec
+drop Clave
+rename P03 INC_RA
+rename P06 IIC_RA
+keep IRUC INC_RA IIC_RA
+duplicates drop IRUC, force
+
+save "2015/Data Limpia/c09DE_2_2015.dta", replace
+
+
+/////////////////////////////////////////////////////
+
+*Importamos Base c11_1 Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Total personal ocupado,Total personal ocupado hombre y Total personal ocupado mujer  . 
+
+clear
+import excel "2015/552-Modulo1104/a2015_s11_fD2/a2015_s11_fD2_c11_1.xlsx", sheet("Hoja 1") firstrow
+
+drop NroEstablec
+drop Clave
+rename P01 TPO
+rename P02 TPOH
+rename P03 TPOM
+keep IRUC TPO TPOH TPOM
+duplicates drop IRUC, force
+
+save "2015/Data Limpia/c11_1_2015.dta", replace
+
+///////////MERGE 2015////////////////////
+
+// Cargamos la base principal CAP_01
+clear
+use "2015/Data Limpia/CAP_01_2015.dta"
+
+// Merge con la base C00_1
+merge 1:1 IRUC using "2015/Data Limpia/C00_1_2015.dta"
+rename _merge merge_C00_1
+
+// Merge con la base C02_1
+merge 1:1 IRUC using "2015/Data Limpia/c02_1_2015.dta"
+rename _merge merge_C02_1
+
+// Merge con la base C02E_2
+merge 1:1 IRUC using "2015/Data Limpia/C02E_2_2015.dta"
+rename _merge merge_C02E_2
+
+// Merge con la base c08AE_2
+merge 1:1 IRUC using "2015/Data Limpia/c08AE_2_2015.dta"
+rename _merge merge_c08AE_2
+
+// Merge con la base c08_1
+merge 1:1 IRUC using "2015/Data Limpia/c08_1_2015.dta"
+rename _merge merge_c08_1
+
+// Merge con la base c09AE_2
+merge 1:1 IRUC using "2015/Data Limpia/c09AE_2_2015.dta"
+rename _merge merge_c09AE_2
+
+// Merge con la base c09DE_2
+merge 1:1 IRUC using "2015/Data Limpia/c09DE_2_2015.dta"
+rename _merge merge_c09DE_2
+
+// Merge con la base c11_1
+merge 1:1 IRUC using "2015/Data Limpia/c11_1_2015.dta"
+rename _merge merge_c11_1
+
+
+drop merge_c11_1
+drop merge_c09DE_2
+drop merge_C00_1
+drop merge_C02E_2
+drop merge_c08_1
+drop merge_C02_1
+drop merge_c09AE_2
+drop merge_c08AE_2
+
+*generar variables
+
+gen VETO = VEP + VEX 
+gen REPR = GAP/TPO
+
+*crear una variable que se llame año para saber en que año pertenece la data 
+gen year = 2015
+destring FECANIVERSARIO, replace force
+destring CODSECTOR, replace force
+destring REE, replace force
+destring VEP, replace force
+destring VEX, replace force
+destring INC_MP, replace force
+destring IIC_MP, replace force
+destring GAP, replace force
+destring VETO, replace force
+destring INC_RA, replace force
+destring IIC_RA, replace force
+destring CODORGJURIDICA, replace force
+destring CODREGPROPIEDAD, replace force
+// Guardamos la base final
+
+keep if CODSECTOR == 11
+save "2015/Data Limpia/2015.dta", replace
+
+misstable summarize
+count if missing(ingresosnetos)
+
+******************************Manufacturas Proyecto INEI 2016*******************************************
+****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************
+
+
+*Importamos Base CAP_01, Necesitaremos las variables: IRUC, CIIU, CCDD, CCPP, Organización Jurídica, Regimen de propiedad, Sector, Año inicio de actividades.
+
+clear
+import excel "2016/552-Modulo1116/a2016_CAP_01/a2016_CAP_01.xlsx", sheet("Hoja 1") firstrow
+
+*Borramos las variables que no necesitamos y hacemos un rename de las que si queremos (también podemos hacer un keep con las variables que queremos)
+drop NroEstablec
+drop Ccdi
+drop CodFormato
+drop FACTOR_EXP
+*Eliminamos duplicados para proceder con el merge
+duplicates drop IRUC, force
+replace FecAniversario = 1995 if IRUC == 15616
+
+*Hacemos un rename para poder hacer el Merge Completo 
+
+*rename Ciiu CIIU
+rename Ccdd CCDD
+rename Ccpp CCPP
+rename CodOrgJuridica CODORGJURIDICA 
+rename CodRegPropiedad CODREGPROPIEDAD
+rename FecAniversario FECANIVERSARIO
+rename CodSector CODSECTOR
+
+//BASE 2016 LIMPIA CON TODOS LOS DATOS SOLICITADOS// 
+
+* Guardamos la base de datos en formato Stata (.dta)
+save "2016/Data Limpia/CAP_01_2016.dta", replace
+
+///////////////////////////////////////////////////////////////////
+*Importamos Base C00_1, Necesitaremos las variables: IRUC(Está en CAP_01) Meses trabajados, Ingresos Netos.
+clear
+import excel "2016/552-Modulo1126/a2016_s11_fD2/a2016_s11_fD2_c00_1.xlsx", sheet("Hoja 1") firstrow
+
+*Borramos las variables que no necesitamos y hacemos un rename de las que si queremos
+
+*Como haremos el merge por IRUC, podemos borrar las variables repetidas. 
+rename T02 ingresosnetos
+rename T03 mesestrabajados
+
+keep IRUC ingresosnetos mesestrabajados
+
+save "2016/Data Limpia/C00_1_2016.dta", replace
+
+/////////////////////////////////////////////////////
+
+*Importamos Base C02_1, Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Resultado del ejercicio. 
+
+clear
+import excel "2016/552-Modulo1126/a2016_s11_fD2/a2016_s11_fD2_c02_1.xlsx", sheet("Hoja 1") firstrow
+
+drop Nroestablec
+drop Clave
+rename P01 REE
+keep IRUC REE
+duplicates drop IRUC, force
+
+save "2016/Data Limpia/c02_1_2016.dta", replace
+
+/////////////////////////////////////////////////////
+
+*Importamos Base C02E_2, Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Ventas en el pais y Ventas en el exterior. 
+
+clear
+import excel "2016/552-Modulo1126/a2016_s11_fD2/a2016_s11_fD2_c02E_2.xlsx", sheet("Hoja 1") firstrow
+
+drop Nroestablec
+drop Clave
+rename P01 VEP
+rename P02 VEX
+
+keep IRUC VEP VEX
+
+duplicates drop IRUC, force
+save "2016/Data Limpia/C02E_2_2016.dta", replace
+
+/////////////////////////////////////////////////////
+
+*Importamos Base C08AE_2 Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Gastos de personal . 
+
+clear
+import excel "2016/552-Modulo1126/a2016_s11_fD2/a2016_s11_fD2_c08AE_2.xlsx", sheet("Hoja 1") firstrow
+
+drop NroEstablec
+drop Clave
+rename P01 GAP
+rename P02 GAPP
+rename P03 GAPE
+keep IRUC GAP GAPP GAPE
+duplicates drop IRUC, force
+
+save "2016/Data Limpia/c08AE_2_2016.dta", replace
+
+/////////////////////////////////////////////////////
+
+*Importamos Base c08_1 Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Dividendos . 
+
+clear
+import excel "2016/552-Modulo1126/a2016_s11_fD2/a2016_s11_fD2_c08_1.xlsx", sheet("Hoja 1") firstrow
+
+drop Nroestablec
+drop Clave
+rename P01 DIVI
+
+keep IRUC DIVI 
+duplicates drop IRUC, force
+save "2016/Data Limpia/c08_1_2016.dta", replace
+
+/////////////////////////////////////////////////////
+
+*Importamos Base c09AE_2 Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Insumos importados consumidos (materia prima) y Insumos nacionales consumidos (materia prima) . 
+
+clear
+import excel "2016/552-Modulo1126/a2016_s11_fD2/a2016_s11_fD2_c09AE_2.xlsx", sheet("Hoja 1") firstrow
+
+drop NroEstablec
+drop Clave
+rename P03 INC_MP
+rename P06 IIC_MP
+keep IRUC INC_MP IIC_MP
+duplicates drop IRUC, force
+save "2016/Data Limpia/c09AE_2_2016.dta", replace
+
+*Importamos Base c09DE_2 Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Insumos nacionales consumidos (repuestos y accesorios),Insumos importados consumidos (repuestos y accesorios)  . 
+
+clear
+import excel "2016/552-Modulo1126/a2016_s11_fD2/a2016_s11_fD2_c09DE_2.xlsx", sheet("Hoja 1") firstrow
+
+drop NroEstablec
+drop Clave
+rename P03 INC_RA
+rename P06 IIC_RA
+keep IRUC INC_RA IIC_RA
+duplicates drop IRUC, force
+
+save "2016/Data Limpia/c09DE_2_2016.dta", replace
+
+
+/////////////////////////////////////////////////////
+
+*Importamos Base c11_1 Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Total personal ocupado,Total personal ocupado hombre y Total personal ocupado mujer  . 
+
+clear
+import excel "2016/552-Modulo1126/a2016_s11_fD2/a2016_s11_fD2_c11_1.xlsx", sheet("Hoja 1") firstrow
+
+drop NroEstablec
+drop Clave
+rename P01 TPO
+rename P02 TPOH
+rename P03 TPOM
+keep IRUC TPO TPOH TPOM
+duplicates drop IRUC, force
+
+save "2016/Data Limpia/c11_1_2016.dta", replace
+///////////MERGE 2016////////////////////
+
+// Cargamos la base principal CAP_01
+clear
+use "2016/Data Limpia/CAP_01_2016.dta"
+
+// Merge con la base C00_1
+merge 1:1 IRUC using "2016/Data Limpia/C00_1_2016.dta"
+rename _merge merge_C00_1
+
+// Merge con la base C02_1
+merge 1:1 IRUC using "2016/Data Limpia/c02_1_2016.dta"
+rename _merge merge_C02_1
+
+// Merge con la base C02E_2
+merge 1:1 IRUC using "2016/Data Limpia/C02E_2_2016.dta"
+rename _merge merge_C02E_2
+
+// Merge con la base c08AE_2
+merge 1:1 IRUC using "2016/Data Limpia/c08AE_2_2016.dta"
+rename _merge merge_c08AE_2
+
+// Merge con la base c08_1
+merge 1:1 IRUC using "2016/Data Limpia/c08_1_2016.dta"
+rename _merge merge_c08_1
+
+// Merge con la base c09AE_2
+merge 1:1 IRUC using "2016/Data Limpia/c09AE_2_2016.dta"
+rename _merge merge_c09AE_2
+
+// Merge con la base c09DE_2
+merge 1:1 IRUC using "2016/Data Limpia/c09DE_2_2016.dta"
+rename _merge merge_c09DE_2
+
+// Merge con la base c11_1
+merge 1:1 IRUC using "2016/Data Limpia/c11_1_2016.dta"
+rename _merge merge_c11_1
+
+
+drop merge_c11_1
+drop merge_c09DE_2
+drop merge_C00_1
+drop merge_C02E_2
+drop merge_c08_1
+drop merge_C02_1
+drop merge_c09AE_2
+drop merge_c08AE_2
+
+*generar variables
+
+gen VETO = VEP + VEX 
+gen REPR = GAP/TPO
+*crear una variable que se llame año para saber en que año pertenece la data 
+gen year = 2016
+destring FECANIVERSARIO, replace force
+destring CODSECTOR, replace force
+destring REE, replace force
+destring VEX, replace force
+destring VEP, replace force
+destring INC_MP, replace force
+destring IIC_MP, replace force
+destring GAP, replace force
+destring VETO, replace force
+destring GAPP, replace force
+destring INC_RA, replace force
+destring GAPE, replace force
+destring IIC_RA, replace force
+destring CODORGJURIDICA, replace force
+destring CODREGPROPIEDAD, replace force
+keep if CODSECTOR == 11
+// Guardamos la base final
+
+save "2016/Data Limpia/2016.dta", replace
+
+misstable summarize
+count if missing(ingresosnetos)
+******************************Manufacturas Proyecto INEI 2017*******************************************
+****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************
+
+
+*Importamos Base CAP_01, Necesitaremos las variables: IRUC, CIIU, CCDD, CCPP, Organización Jurídica, Regimen de propiedad, Sector, Año inicio de actividades.
+
+clear
+import excel "2017/630-Modulo1560/a2017_CAP_01/a2017_CAP_01.xlsx", sheet("Hoja 1") firstrow
+
+*Borramos las variables que no necesitamos y hacemos un rename de las que si queremos (también podemos hacer un keep con las variables que queremos)
+drop NroEstablec
+drop Ccdi
+drop CodFormato
+drop FACTOR_EXP
+rename iruc IRUC
+*Eliminamos duplicados para proceder con el merge
+duplicates drop IRUC, force
+*Hacemos un rename para poder hacer el Merge Completo 
+
+*rename Ciiu CIIU
+rename Ccdd CCDD
+rename Ccpp CCPP
+rename CodOrgJuridica CODORGJURIDICA 
+rename CodRegPropiedad CODREGPROPIEDAD
+rename FecAniversario FECANIVERSARIO
+rename CodSector CODSECTOR
+
+//BASE 2017 LIMPIA CON TODOS LOS DATOS SOLICITADOS// 
+
+* Guardamos la base de datos en formato Stata (.dta)
+save "2017/Data Limpia/CAP_01_2017.dta", replace
+
+///////////////////////////////////////////////////////////////////
+*Importamos Base C00_1, Necesitaremos las variables: IRUC(Está en CAP_01) Meses trabajados, Ingresos Netos.
+clear
+import excel "2017/630-Modulo1570/a2017_s11_fD2/a2017_s11_fD2_c00_1.xlsx", sheet("Hoja 1") firstrow
+
+*Borramos las variables que no necesitamos y hacemos un rename de las que si queremos
+
+*Como haremos el merge por IRUC, podemos borrar las variables repetidas. 
+rename iruc IRUC
+rename T02 ingresosnetos
+rename T03 mesestrabajados
+
+keep IRUC ingresosnetos mesestrabajados
+
+save "2017/Data Limpia/C00_1_2017.dta", replace
+
+/////////////////////////////////////////////////////
+
+*Importamos Base C02_1, Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Resultado del ejercicio. 
+
+clear
+import excel "2017/630-Modulo1570/a2017_s11_fD2/a2017_s11_fD2_c02_1.xlsx", sheet("Hoja 1") firstrow
+
+drop Nroestablec
+drop Clave
+rename P01 REE
+keep IRUC REE
+duplicates drop IRUC, force
+
+save "2017/Data Limpia/c02_1_2017.dta", replace
+
+/////////////////////////////////////////////////////
+
+*Importamos Base C02E_2, Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Ventas en el pais y Ventas en el exterior. 
+
+clear
+import excel "2017/630-Modulo1570/a2017_s11_fD2/a2017_s11_fD2_c02E_2.xlsx", sheet("Hoja 1") firstrow
+
+drop Nroestablec
+drop Clave
+rename P01 VEP
+rename P02 VEX
+
+keep IRUC VEP VEX
+
+duplicates drop IRUC, force
+save "2017/Data Limpia/C02E_2_2017.dta", replace
+
+/////////////////////////////////////////////////////
+
+*Importamos Base C08AE_2 Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Gastos de personal . 
+
+clear
+import excel "2017/630-Modulo1570/a2017_s11_fD2/a2017_s11_fD2_c08AE_2.xlsx", sheet("Hoja 1") firstrow
+
+drop NroEstablec
+drop Clave
+rename P01 GAP
+rename P02 GAPP
+rename P03 GAPE
+keep IRUC GAP GAPP GAPE
+duplicates drop IRUC, force
+
+save "2017/Data Limpia/c08AE_2_2017.dta", replace
+
+/////////////////////////////////////////////////////
+
+*Importamos Base c08_1 Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Dividendos . 
+
+clear
+import excel "2017/630-Modulo1570/a2017_s11_fD2/a2017_s11_fD2_c08_1.xlsx", sheet("Hoja 1") firstrow
+
+drop Nroestablec
+drop Clave
+rename P01 DIVI
+
+keep IRUC DIVI 
+duplicates drop IRUC, force
+save "2017/Data Limpia/c08_1_2017.dta", replace
+
+/////////////////////////////////////////////////////
+
+*Importamos Base c09AE_2 Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Insumos importados consumidos (materia prima) y Insumos nacionales consumidos (materia prima) . 
+
+clear
+import excel "2017/630-Modulo1570/a2017_s11_fD2/a2017_s11_fD2_c09AE_2.xlsx", sheet("Hoja 1") firstrow
+
+drop NroEstablec
+drop Clave
+rename P03 INC_MP
+rename P06 IIC_MP
+keep IRUC INC_MP IIC_MP
+duplicates drop IRUC, force
+save "2017/Data Limpia/c09AE_2_2017.dta", replace
+
+/////////////////////////////////////////////////////
+
+
+*Importamos Base c09DE_2 Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Insumos nacionales consumidos (repuestos y accesorios),Insumos importados consumidos (repuestos y accesorios)  . 
+
+clear
+import excel "2017/630-Modulo1570/a2017_s11_fD2/a2017_s11_fD2_c09DE_2.xlsx", sheet("Hoja 1") firstrow
+
+drop NroEstablec
+drop Clave
+rename P03 INC_RA
+rename P06 IIC_RA
+keep IRUC INC_RA IIC_RA
+duplicates drop IRUC, force
+
+save "2017/Data Limpia/c09DE_2_2017.dta", replace
+
+
+/////////////////////////////////////////////////////
+
+*Importamos Base c11_1 Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Total personal ocupado,Total personal ocupado hombre y Total personal ocupado mujer  . 
+
+clear
+import excel "2017/630-Modulo1570/a2017_s11_fD2/a2017_s11_fD2_c11_1.xlsx", sheet("Hoja 1") firstrow
+
+drop NroEstablec
+drop Clave
+rename P01 TPO
+rename P02 TPOH
+rename P03 TPOM
+keep IRUC TPO TPOH TPOM
+duplicates drop IRUC, force
+
+save "2017/Data Limpia/c11_1_2017.dta", replace
+///////////MERGE 2017////////////////////
+
+// Cargamos la base principal CAP_01
+clear
+use "2017/Data Limpia/CAP_01_2017.dta"
+
+// Merge con la base C00_1
+merge 1:1 IRUC using "2017/Data Limpia/C00_1_2017.dta"
+rename _merge merge_C00_1
+
+// Merge con la base C02_1
+merge 1:1 IRUC using "2017/Data Limpia/c02_1_2017.dta"
+rename _merge merge_C02_1
+
+// Merge con la base C02E_2
+merge 1:1 IRUC using "2017/Data Limpia/C02E_2_2017.dta"
+rename _merge merge_C02E_2
+
+// Merge con la base c08AE_2
+merge 1:1 IRUC using "2017/Data Limpia/c08AE_2_2017.dta"
+rename _merge merge_c08AE_2
+
+// Merge con la base c08_1
+merge 1:1 IRUC using "2017/Data Limpia/c08_1_2017.dta"
+rename _merge merge_c08_1
+
+// Merge con la base c09AE_2
+merge 1:1 IRUC using "2017/Data Limpia/c09AE_2_2017.dta"
+rename _merge merge_c09AE_2
+
+// Merge con la base c09DE_2
+merge 1:1 IRUC using "2017/Data Limpia/c09DE_2_2017.dta"
+rename _merge merge_c09DE_2
+
+// Merge con la base c11_1
+merge 1:1 IRUC using "2017/Data Limpia/c11_1_2017.dta"
+rename _merge merge_c11_1
+
+
+drop merge_c11_1
+drop merge_c09DE_2
+drop merge_C00_1
+drop merge_C02E_2
+drop merge_c08_1
+drop merge_C02_1
+drop merge_c09AE_2
+drop merge_c08AE_2
+
+*generar variables
+
+gen VETO = VEP + VEX 
+gen REPR = GAP/TPO
+*crear una variable que se llame año para saber en que año pertenece la data 
+gen year = 2017
+destring FECANIVERSARIO, replace force
+destring CODSECTOR, replace force
+destring REE, replace force
+destring VEX, replace force
+destring VEP, replace force
+destring INC_MP, replace force
+destring IIC_MP, replace force
+destring GAP, replace force
+destring GAPP, replace force
+destring VETO, replace force
+destring INC_RA, replace force
+destring GAPE, replace force
+destring IIC_RA, replace force
+destring CODORGJURIDICA, replace force
+destring CODREGPROPIEDAD, replace force
+// Guardamos la base final
+keep if CODSECTOR == 11
+
+save "2017/Data Limpia/2017.dta", replace
+
+misstable summarize
+count if missing(ingresosnetos)
+******************************Manufacturas Proyecto INEI 2018*******************************************
+****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************
+
+
+*Importamos Base CAP_01, Necesitaremos las variables: IRUC, CIIU, CCDD, CCPP, Organización Jurídica, Regimen de propiedad, Sector, Año inicio de actividades.
+
+clear
+import excel "2018/733-Modulo1592/a2018_CAP_01/a2018_CAP_01.xlsx", sheet("Hoja 1") firstrow
+
+*Borramos las variables que no necesitamos y hacemos un rename de las que si queremos (también podemos hacer un keep con las variables que queremos)
+drop NroEstablec
+drop Ccdi
+drop CodFormato
+drop FACTOR_EXP
+*rename iruc IRUC
+*Eliminamos duplicados para proceder con el merge
+duplicates drop IRUC, force
+*Hacemos un rename para poder hacer el Merge Completo 
+
+*rename Ciiu CIIU
+rename Ccdd CCDD
+rename Ccpp CCPP
+rename CodOrgJuridica CODORGJURIDICA 
+rename CodRegPropiedad CODREGPROPIEDAD
+rename FecAniversario FECANIVERSARIO
+rename CodSector CODSECTOR
+
+//BASE 2018 LIMPIA CON TODOS LOS DATOS SOLICITADOS// 
+
+* Guardamos la base de datos en formato Stata (.dta)
+save "2018/Data Limpia/CAP_01_2018.dta", replace
+
+///////////////////////////////////////////////////////////////////
+*Importamos Base C00_1, Necesitaremos las variables: IRUC(Está en CAP_01) Meses trabajados, Ingresos Netos.
+clear
+import excel "2018/733-Modulo1602/a2018_s11_fD2/a2018_s11_fD2_c00_1.xlsx", sheet("Hoja 1") firstrow
+
+*Borramos las variables que no necesitamos y hacemos un rename de las que si queremos
+
+*Como haremos el merge por IRUC, podemos borrar las variables repetidas. 
+*rename iruc IRUC
+rename T02 ingresosnetos
+rename T04 mesestrabajados
+
+keep IRUC ingresosnetos mesestrabajados
+duplicates drop IRUC, force
+
+save "2018/Data Limpia/C00_1_2018.dta", replace
+
+/////////////////////////////////////////////////////
+
+*Importamos Base C02_1, Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Resultado del ejercicio. 
+
+clear
+import excel "2018/733-Modulo1602/a2018_s11_fD2/a2018_s11_fD2_c02_1.xlsx", sheet("Hoja 1") firstrow
+
+drop NroEstablec
+drop Clave
+rename P01 REE
+keep IRUC REE
+duplicates drop IRUC, force
+
+save "2018/Data Limpia/c02_1_2018.dta", replace
+
+/////////////////////////////////////////////////////
+
+*Importamos Base C02E_2, Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Ventas en el pais y Ventas en el exterior. 
+
+clear
+import excel "2018/733-Modulo1602/a2018_s11_fD2/a2018_s11_fD2_c02E_2.xlsx", sheet("Hoja 1") firstrow
+
+drop NroEstablec
+drop Clave
+rename P01 VEP
+rename P02 VEX
+
+keep IRUC VEP VEX
+
+duplicates drop IRUC, force
+save "2018/Data Limpia/C02E_2_2018.dta", replace
+
+/////////////////////////////////////////////////////
+
+*Importamos Base C08AE_2 Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Gastos de personal . 
+
+clear
+import excel "2018/733-Modulo1602/a2018_s11_fD2/a2018_s11_fD2_c08AE_2.xlsx", sheet("Hoja 1") firstrow
+
+drop NroEstablec
+drop Clave
+rename P01 GAP
+rename P02 GAPP
+rename P03 GAPE
+keep IRUC GAP GAPP GAPE
+duplicates drop IRUC, force
+
+save "2018/Data Limpia/c08AE_2_2018.dta", replace
+
+/////////////////////////////////////////////////////
+
+*Importamos Base c08_1 Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Dividendos . 
+
+clear
+import excel "2018/733-Modulo1602/a2018_s11_fD2/a2018_s11_fD2_c08_1.xlsx", sheet("Hoja 1") firstrow
+
+drop NroEstablec
+drop Clave
+rename P01 DIVI
+
+keep IRUC DIVI 
+duplicates drop IRUC, force
+save "2018/Data Limpia/c08_1_2018.dta", replace
+
+/////////////////////////////////////////////////////
+
+*Importamos Base c09AE_2 Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Insumos importados consumidos (materia prima) y Insumos nacionales consumidos (materia prima) . 
+
+clear
+import excel "2018/733-Modulo1602/a2018_s11_fD2/a2018_s11_fD2_c09AE_2.xlsx", sheet("Hoja 1") firstrow
+
+drop NroEstablec
+drop Clave
+rename P03 INC_MP
+rename P06 IIC_MP
+keep IRUC INC_MP IIC_MP
+duplicates drop IRUC, force
+save "2018/Data Limpia/c09AE_2_2018.dta", replace
+
+/////////////////////////////////////////////////////
+
+
+*Importamos Base c09DE_2 Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Insumos nacionales consumidos (repuestos y accesorios),Insumos importados consumidos (repuestos y accesorios)  . 
+
+clear
+import excel "2018/733-Modulo1602/a2018_s11_fD2/a2018_s11_fD2_c09DE_2.xlsx", sheet("Hoja 1") firstrow
+
+drop NroEstablec
+drop Clave
+rename P03 INC_RA
+rename P06 IIC_RA
+keep IRUC INC_RA IIC_RA
+duplicates drop IRUC, force
+
+save "2018/Data Limpia/c09DE_2_2018.dta", replace
+
+
+/////////////////////////////////////////////////////
+
+*Importamos Base c11_1 Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Total personal ocupado,Total personal ocupado hombre y Total personal ocupado mujer  . 
+
+clear
+import excel "2018/733-Modulo1602/a2018_s11_fD2/a2018_s11_fD2_c11_1.xlsx", sheet("Hoja 1") firstrow
+
+drop NroEstablec
+drop Clave
+rename P01 TPO
+rename P02 TPOH
+rename P03 TPOM
+keep IRUC TPO TPOH TPOM
+duplicates drop IRUC, force
+
+save "2018/Data Limpia/c11_1_2018.dta", replace
+///////////MERGE 2018////////////////////
+
+// Cargamos la base principal CAP_01
+clear
+use "2018/Data Limpia/CAP_01_2018.dta"
+
+// Merge con la base C00_1
+merge 1:1 IRUC using "2018/Data Limpia/C00_1_2018.dta"
+rename _merge merge_C00_1
+
+// Merge con la base C02_1
+merge 1:1 IRUC using "2018/Data Limpia/c02_1_2018.dta"
+rename _merge merge_C02_1
+
+// Merge con la base C02E_2
+merge 1:1 IRUC using "2018/Data Limpia/C02E_2_2018.dta"
+rename _merge merge_C02E_2
+
+// Merge con la base c08AE_2
+merge 1:1 IRUC using "2018/Data Limpia/c08AE_2_2018.dta"
+rename _merge merge_c08AE_2
+
+// Merge con la base c08_1
+merge 1:1 IRUC using "2018/Data Limpia/c08_1_2018.dta"
+rename _merge merge_c08_1
+
+// Merge con la base c09AE_2
+merge 1:1 IRUC using "2018/Data Limpia/c09AE_2_2018.dta"
+rename _merge merge_c09AE_2
+
+// Merge con la base c09DE_2
+merge 1:1 IRUC using "2018/Data Limpia/c09DE_2_2018.dta"
+rename _merge merge_c09DE_2
+
+// Merge con la base c11_1
+merge 1:1 IRUC using "2018/Data Limpia/c11_1_2018.dta"
+rename _merge merge_c11_1
+
+
+drop merge_c11_1
+drop merge_c09DE_2
+drop merge_C00_1
+drop merge_C02E_2
+drop merge_c08_1
+drop merge_C02_1
+drop merge_c09AE_2
+drop merge_c08AE_2
+
+*generar variables
+
+gen VETO = VEP + VEX 
+gen REPR = GAP/TPO
+*crear una variable que se llame año para saber en que año pertenece la data 
+gen year = 2018
+destring REE, replace force
+destring FECANIVERSARIO, replace force
+destring CODSECTOR, replace force
+destring VEX, replace force
+destring VEP, replace force
+destring INC_MP, replace force
+destring IIC_MP, replace force
+destring VETO, replace force
+destring GAP, replace force
+destring GAPP, replace force
+destring VETO, replace force
+destring INC_RA, replace force
+destring GAPE, replace force
+destring IIC_RA, replace force
+destring CODORGJURIDICA, replace force
+destring CODREGPROPIEDAD, replace force
+// Guardamos la base final
+
+keep if CODSECTOR == 11
+
+save "2018/Data Limpia/2018.dta", replace
+
+misstable summarize
+count if missing(ingresosnetos)
+******************************Manufacturas Proyecto INEI 2019*******************************************
+****************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************
+
+
+*Importamos Base CAP_01, Necesitaremos las variables: IRUC, CIIU, CCDD, CCPP, Organización Jurídica, Regimen de propiedad, Sector, Año inicio de actividades.
+
+clear
+import excel "2019/630-Modulo1620/a2019_CAP_01/a2019_CAP_01.xlsx", sheet("Hoja 1") firstrow
+
+*Borramos las variables que no necesitamos y hacemos un rename de las que si queremos (también podemos hacer un keep con las variables que queremos)
+drop texto1 
+drop texto2
+drop texto3
+drop texto4 
+drop NROESTABLEC
+drop CCDI
+drop CODFORMATO
+drop FAC_EXP
+*rename iruc IRUC
+*Eliminamos duplicados para proceder con el merge
+
+duplicates drop IRUC, force
+*Hacemos un rename para poder hacer el Merge Completo 
+
+*rename Ciiu CIIU
+*rename Ccdd CCDD
+*rename Ccpp CCPP
+*rename CodOrgJuridica CODORGJURIDICA 
+*rename CodRegPropiedad CODREGPROPIEDAD
+rename FecAniversario FECANIVERSARIO
+destring FECANIVERSARIO, replace force
+
+replace FECANIVERSARIO = 1994 if IRUC == 15369
+
+*rename CodSector CODSECTOR
+
+//BASE 2019 LIMPIA CON TODOS LOS DATOS SOLICITADOS// 
+
+* Guardamos la base de datos en formato Stata (.dta)
+save "2019/Data Limpia/CAP_01_2019.dta", replace
+
+******
+
+*Importamos Base C00_1, Necesitaremos las variables: IRUC(Está en CAP_01) Meses trabajados, Ingresos Netos.
+clear
+import excel "2019/630-Modulo1629/a2019_s11_fD2/a2019_s11_fD2_c00_1.xlsx", sheet("Hoja 1") firstrow
+
+*Borramos las variables que no necesitamos y hacemos un rename de las que si queremos
+
+*Como haremos el merge por IRUC, podemos borrar las variables repetidas. 
+*rename iruc IRUC
+rename dato1 ingresosnetos
+rename texto2 mesestrabajados
+
+keep IRUC ingresosnetos mesestrabajados
+duplicates drop IRUC, force
+
+save "2019/Data Limpia/C00_1_2019.dta", replace
+
+/////////////////////////////////////////////////////
+
+*Importamos Base C02_1, Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Beneficios del ejercicio anuales 79
+
+clear
+import excel "2019/630-Modulo1629/a2019_s11_fD2/a2019_s11_fD2_c02_1.xlsx", sheet("Hoja 1") firstrow
+
+*Nos quedaremos con dato1 que es el ejercicio 2019 y ahora tenemos que transponer la data. 
+drop dato2 
+rename dato1 ejercicio_2019
+keep IRUC CLAVE ejercicio_2019
+reshape wide ejercicio_2019, i(IRUC) j(CLAVE)
+rename ejercicio_2019* ejercicio_2019_*
+
+* Hacemos Rename  
+rename ejercicio_2019_79 REE
+
+duplicates drop IRUC, force
+keep IRUC REE 
+
+save "2019/Data Limpia/c02_1_2019.dta", replace
+
+/////////////////////////////////////////////////////
+
+*Importamos Base C02E_2, Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Ventas en el pais y Ventas en el exterior. 
+
+clear
+import excel "2019/630-Modulo1629/a2019_s11_fD2/a2019_s11_fD2_c02E_2.xlsx", sheet("Hoja 1") firstrow
+
+drop NroEstablec
+drop CLAVE
+rename dato1 VEP
+rename dato2 VEX
+
+keep IRUC VEP VEX
+
+duplicates drop IRUC, force
+save "2019/Data Limpia/C02E_2_2019.dta", replace
+
+/////////////////////////////////////////////////////
+
+*Importamos Base C07E_2 Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Gastos de personal . 
+
+clear
+import excel "2019/630-Modulo1629/a2019_s11_fD2/a2019_s11_fD2_c07E_2.xlsx", sheet("Hoja 1") firstrow
+
+drop NroEstablec
+drop CLAVE
+rename dato1 GAP
+rename dato2 GAPP
+rename dato5 GAPE
+keep IRUC GAP GAPP GAPE
+duplicates drop IRUC, force
+
+save "2019/Data Limpia/c07E_2_2019.dta", replace
+
+/////////////////////////////////////////////////////
+
+*Importamos Base c08_1 Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Dividendos . 
+
+clear
+import excel "2019/630-Modulo1629/a2019_s11_fD2/a2019_s11_fD2_c08_1.xlsx", sheet("Hoja 1") firstrow
+
+drop NroEstablec
+drop CLAVE
+rename dato1 DIVI
+
+keep IRUC DIVI 
+duplicates drop IRUC, force
+save "2019/Data Limpia/c08_1_2019.dta", replace
+
+/////////////////////////////////////////////////////
+
+*Importamos Base c09AE_2 Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Insumos importados consumidos (materia prima) y Insumos nacionales consumidos (materia prima) . 
+
+clear
+import excel "2019/630-Modulo1629/a2019_s11_fD2/a2019_s11_fD2_c09AE_2.xlsx", sheet("Hoja 1") firstrow
+
+drop NroEstablec
+drop CLAVE
+rename dato3 INC_MP
+rename dato6 IIC_MP
+keep IRUC INC_MP IIC_MP
+duplicates drop IRUC, force
+save "2019/Data Limpia/c09AE_2_2019.dta", replace
+
+/////////////////////////////////////////////////////
+
+
+*Importamos Base c09DE_2 Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Insumos nacionales consumidos (repuestos y accesorios),Insumos importados consumidos (repuestos y accesorios)  . 
+
+clear
+import excel "2019/630-Modulo1629/a2019_s11_fD2/a2019_s11_fD2_c09DE_2.xlsx", sheet("Hoja 1") firstrow
+
+drop NroEstablec
+drop CLAVE
+rename dato3 INC_RA
+rename dato6 IIC_RA
+keep IRUC INC_RA IIC_RA
+duplicates drop IRUC, force
+
+save "2019/Data Limpia/c09DE_2_2019.dta", replace
+
+
+/////////////////////////////////////////////////////
+
+*Importamos Base c11_1 Necesitaremos las variables: IRUC(Está en CAP_01,C00_1), Total personal ocupado,Total personal ocupado hombre y Total personal ocupado mujer  . 
+
+clear
+import excel "2019/630-Modulo1629/a2019_s11_fD2/a2019_s11_fD2_c011_1.xlsx", sheet("Hoja 1") firstrow
+
+drop NroEstablec
+drop CLAVE
+rename dato1 TPO
+rename dato2 TPOH
+rename dato3 TPOM
+keep IRUC TPO TPOH TPOM
+duplicates drop IRUC, force
+
+save "2019/Data Limpia/c11_1_2019.dta", replace
+///////////MERGE 2019////////////////////
+
+// Cargamos la base principal CAP_01
+clear
+use "2019/Data Limpia/CAP_01_2019.dta"
+
+// Merge con la base C00_1
+merge 1:1 IRUC using "2019/Data Limpia/C00_1_2019.dta"
+rename _merge merge_C00_1
+
+// Merge con la base C02_1
+merge 1:1 IRUC using "2019/Data Limpia/c02_1_2019.dta"
+rename _merge merge_C02_1
+
+// Merge con la base C02E_2
+merge 1:1 IRUC using "2019/Data Limpia/C02E_2_2019.dta"
+rename _merge merge_C02E_2
+
+// Merge con la base c07E_2
+merge 1:1 IRUC using "2019/Data Limpia/c07E_2_2019.dta"
+rename _merge merge_c07E_2
+
+// Merge con la base c08_1
+merge 1:1 IRUC using "2019/Data Limpia/c08_1_2019.dta"
+rename _merge merge_c08_1
+
+// Merge con la base c09AE_2
+merge 1:1 IRUC using "2019/Data Limpia/c09AE_2_2019.dta"
+rename _merge merge_c09AE_2
+
+// Merge con la base c09DE_2
+merge 1:1 IRUC using "2019/Data Limpia/c09DE_2_2019.dta"
+rename _merge merge_c09DE_2
+
+// Merge con la base c11_1
+merge 1:1 IRUC using "2019/Data Limpia/c11_1_2019.dta"
+rename _merge merge_c11_1
+
+
+drop merge_c11_1
+drop merge_c09DE_2
+drop merge_C00_1
+drop merge_C02E_2
+drop merge_c08_1
+drop merge_C02_1
+drop merge_c09AE_2
+drop merge_c07E_2
+
+*generar variables
+
+gen VETO = VEP + VEX 
+gen REPR = GAP/TPO
+*crear una variable que se llame año para saber en que año pertenece la data 
+gen year = 2019
+destring CODSECTOR, replace force
+destring REE, replace force
+destring VEX, replace force
+destring VEP, replace force
+destring INC_MP, replace force
+destring IIC_MP, replace force
+destring VETO, replace force
+destring GAP, replace force
+destring GAPP, replace force
+destring INC_RA, replace force
+destring GAPE, replace force
+destring CODORGJURIDICA, replace force
+destring CODREGPROPIEDAD, replace force
+// Guardamos la base final
+keep if CODSECTOR == 11
+save "2019/Data Limpia/2019.dta", replace
+
+misstable summarize
+count if missing(ingresosnetos)
+
+
+/////////////////////// AHORA DEBEMOS HACER UN MERGE DE TODAS LAS BASES JUNTAS  /////////////////
+
+
+* Combinar todas las bases anuales en una sola
+*clear
+*use "2015/Data Limpia/2015.dta"
+*append using "2016/Data Limpia/2016.dta"
+*append using "2017/Data Limpia/2017.dta"
+*append using "2018/Data Limpia/2018.dta"
+*append using "2019/Data Limpia/2019.dta"
+
+* PASO 1: Unificar todas las bases de datos
+clear
+use "2015/Data Limpia/2015.dta"
+gen source_year = 2015
+
+append using "2016/Data Limpia/2016.dta"
+replace source_year = 2016 if missing(source_year)
+
+append using "2017/Data Limpia/2017.dta"
+replace source_year = 2017 if missing(source_year)
+
+append using "2018/Data Limpia/2018.dta"
+replace source_year = 2018 if missing(source_year)
+
+append using "2019/Data Limpia/2019.dta"
+replace source_year = 2019 if missing(source_year)
+
+* Guardar la base unificada (opcional)
+save "DataUnificada_2015_2019.dta", replace
+
+* PASO 2: Identificar IRUCs presentes en los 5 años
+gen indicator = 1
+
+* Colapsar para contar los años únicos por IRUC
+collapse (sum) indicator, by(IRUC source_year)
+
+* Contar cuántos años únicos tiene cada IRUC
+egen total_years = total(indicator), by(IRUC)
+
+* Quedarse solo con los IRUCs que aparecen en los 5 años
+keep if total_years == 5
+
+* Eliminar duplicados en la lista de IRUCs válidos
+duplicates drop IRUC, force
+
+* Guardar la lista limpia de IRUCs válidos
+save "Valid_IRUCs_Clean.dta", replace
+
+* PASO 3: Filtrar la base original con los IRUCs válidos
+use "DataUnificada_2015_2019.dta"
+
+* Hacer el merge con la lista limpia de IRUCs válidos
+merge m:1 IRUC using "Valid_IRUCs_Clean.dta"
+
+* Filtrar para quedarte solo con los IRUCs válidos
+keep if _merge == 3
+
+* Guardar la base filtrada final
+save "DataIRUC_5Años.dta", replace
+
+* PASO 4: Validar que cada IRUC aparece en los 5 años
+bysort IRUC (source_year): gen count_years = _N
+list IRUC if count_years != 5
+
+* Opcional: Tabular los IRUCs y años para revisión
+tab IRUC source_year
+
+gen ANTIGUEDAD = year - FECANIVERSARIO
+drop indicator
+drop total_years
+drop source_year
+drop _merge
+drop count_years
+
+* Crear la variable PBI con valores vacíos
+gen PBI_pc = .
+
+* Asignar valores del PBI según el año
+replace PBI_pc = 6180.119268 if year == 2015
+replace PBI_pc = 6337.580493 if year == 2016
+replace PBI_pc = 6400.038232 if year == 2017
+replace PBI_pc = 6530.422998 if year == 2018
+replace PBI_pc = 6550.448015 if year == 2019
+* Paso 3: Guardar la base combinada
+save "FinalData_Manufacturas2015-2019.dta", replace
+export excel "FinalData_Manufacturas2015-2019.xlsx", replace firstrow(variables)
